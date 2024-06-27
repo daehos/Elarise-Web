@@ -60,12 +60,7 @@ const ChatRoomGrammar = ({ messages }) => {
               </h1>
               <p className="mt-5  text-black">How Can I Help You?</p>
             </div>
-            //   <div className="flex flex-col h-full text-4xl md:text-6xl lg:text-8xl  items-center font-nunito ">
-            //   <h1 className=" font-semibold mt-52">
-            //     Hello,<span className="text-[#C15891]">Mingyu</span>{" "}
-            //   </h1>
-            //   <p className="mt-5 ">How Can I Help You?</p>
-            // </div>
+           
           )}
           <div ref={messagesEndRef} />
         </div>
