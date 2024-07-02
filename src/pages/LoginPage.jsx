@@ -33,7 +33,7 @@ const LoginPage = ({ onLogin }) => {
   return (
     <main className="bg-[#F196E5] flex h-screen items-center justify-center p-20 lg:px-36">
       <div className="hidden w-full md:block md:w-2/3 h-full bg-[#F196E5] rounded-l-xl shadow-inner drop-shadow-xl">
-        <div className="flex items-center mt-36">
+        <div className="flex items-center mt-24">
           <img src="./sun_login.png" alt="Sun" className="w-60 h-fit" />
           <img
             src="./login_pink.png"

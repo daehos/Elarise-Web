@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useState,useEffect } from "react";
 import axios from "axios";
-import { RiDeleteBin5Line } from "react-icons/ri";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@radix-ui/react-alert-dialog"
 import { useNavigate } from "react-router-dom";
 
-const DeleteButton = ({ chatRoomId, setChats, chats }) => {
-  const navigate = useNavigate();
+const DeleteButton = ({ chatRoomId, setChats, chats, isOpen, onClose }) => {
 
   const handleDelete = async () => {
     try {
@@ -13,13 +21,15 @@ const DeleteButton = ({ chatRoomId, setChats, chats }) => {
       const updatedChats = chats.filter((chat) => chat.id !== chatRoomId);
       setChats(updatedChats);
       const response = await axios.delete(
-        `https://elarise-api-mqvmjbdy5a-et.a.run.app/api/chatroom/${chatRoomId}`,
+        `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+      setChats(chats.filter(chat => chat.id !== chatRoomId));
+      onclose();
     } catch (error) {
       console.error(error.message);
     }
@@ -27,11 +37,33 @@ const DeleteButton = ({ chatRoomId, setChats, chats }) => {
 
   return (
     <>
-      <div className="mt-3">
-        <button onClick={handleDelete} className="text-red-500 text-2xl">
-          <RiDeleteBin5Line />
-        </button>
-      </div>
+       <AlertDialog open={isOpen} onOpenChange={onClose}>
+      
+        <AlertDialogContent>
+          <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this chat? This action cannot be undone.
+          </AlertDialogDescription>
+          <div className="flex justify-end mt-4 text-black font-bold">
+            <AlertDialogCancel asChild>
+              <button
+                className="bg-gray-300 px-4 py-2 rounded-xl mr-2  border-white"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <button
+                className="bg-red-600  px-4 py-2 rounded-xl"
+                onClick={handleDelete}
+              >
+                Delete
+              </button>
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

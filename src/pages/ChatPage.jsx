@@ -58,7 +58,7 @@ const ChatPage = () => {
         },
       ]);
       const response = await axios.post(
-        `https://elarise-api-mqvmjbdy5a-et.a.run.app/api/chatroom/${chatRoomId}/grammar`,
+        `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}/grammar`,
         {
           messageText: message,
         },
@@ -88,7 +88,7 @@ const ChatPage = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          `https://elarise-api-mqvmjbdy5a-et.a.run.app/api/chatroom/${chatRoomId}`,
+          `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -114,23 +114,14 @@ const ChatPage = () => {
       <div className="flex h-screen overflow-hidden ">
         <SidebarGrammar />
         <div className="flex-1 overflow-hidden">
-          {state === true ? <BaseVoiceScreen /> : <></>}
+          {state === true ? <BaseVoiceScreen /> : null}
+          {/* <ChatRoomGrammar messages={messages} /> */}
+          <ChatRoomGrammar messages={messages} setMessages={setMessages} />
           {/* Room Chat */}
           {/* <ChatRoomGrammar key={refreshKey} /> */}
-          <ChatRoomGrammar messages={messages} />
-          {/* Room Chat End */}
-          {/* greeting text */}
-          {/* <div className="flex flex-col h-full text-4xl md:text-6xl lg:text-8xl  items-center font-nunito ">
-            <h1 className=" font-semibold mt-52">
-                Hello,<span className="text-[#C15891]">Mingyu</span>{" "}
-            </h1>
-            <p className="mt-5 ">How Can I Help You?</p>
-            </div> */}
-          {/* greeting text  end*/}
-          {/* area input chat */}
-          <div className=" relative bottom-28 flex flex-row w-full items-center justify-center z-10">
+          <div className=" absolute bottom-0 right-0 flex flex-row w-full items-center  justify-center z-10 ">
             <Textarea
-              className=" w-[60%] text-lg ml-7 mb-4 h-14"
+              className=" relative rounded-full w-[60%] text-lg mb-4 h-14"
               type="input"
               id="chatbot"
               placeholder="Lets discuss!"
@@ -139,7 +130,7 @@ const ChatPage = () => {
             />
 
             <button
-              className="relative bg-[#FFCF00] flex justify-center items-center rounded-full w-20 h-20 ml-5"
+              className="bg-[#FFCF00] flex justify-center rounded-full w-20 h-20 "
               onClick={handleMessage}
             >
               {" "}
