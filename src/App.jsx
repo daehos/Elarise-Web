@@ -3,8 +3,8 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import TalkPage from "./pages/TalkPage";
-import BaseChatScreen from "./Components/chatbot/BaseChatScreen";
-import authService from "./Service/authService";
+// import BaseChatScreen from "./Components/chatbot/BaseChatScreen";
+// import authService from "./Service/authService";
 import ChatPage from "./pages/ChatPage";
 
 function App() {

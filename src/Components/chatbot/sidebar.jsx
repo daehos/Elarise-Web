@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaBars, FaPlus } from "react-icons/fa";
 import { CiChat1 } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
+import DeleteButton from "../DeleteButton";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -103,19 +104,37 @@ const Sidebar = () => {
       )}
       <div className="mx-2 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
         {Array.isArray(chats) ? (
-          chats.map((chat) => (
+          chats.map((chat, index) => (
             <div
+              className={
+                isOpen ? 'flex flex-row justify-between items-center mr-5' : ''
+              }
               key={chat.id}
-              onClick={() => handleChatClick(chat.id)}
-              className="flex items-center bg-white font-semibold drop-shadow text-black p-2 my-2 border-[4px] rounded-2xl hover:bg-gray-200 cursor-pointer"
-              style={{ borderColor: chat.color }}
             >
-              <span className="mr-5 drop-shadow">
-                <CiChat1 className="text-3xl" />
-              </span>
-              {isOpen && chat.chatRoomName}
+              <div
+                onClick={() => handleChatClick(chat.id)}
+                className={
+                  isOpen
+                    ? 'flex items-center bg-white font-semibold drop-shadow text-black py-2 px-8 my-2 border-[4px] rounded-2xl hover:bg-gray-200 cursor-pointer'
+                    : 'flex items-center bg-white font-semibold drop-shadow text-black p-2 my-2 border-[4px] rounded-2xl hover:bg-gray-200 cursor-pointer'
+                }
+                style={{ borderColor: index % 2 === 0 ? '#EFB4D4' : '#F8C807' }}
+              >
+                <span className="mr-5 drop-shadow">
+                  <CiChat1 className="text-3xl" />
+                </span>
+                {isOpen && chat.chatRoomName}
+              </div>
+              {isOpen && (
+                <DeleteButton
+                  chatRoomId={chat.id}
+                  setChats={setChats}
+                  chats={chats}
+                />
+              )}
             </div>
-          ))
+          )
+        )
         ) : (
           <div className="text-center text-gray-500">No chats available</div>
         )}

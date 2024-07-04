@@ -17,12 +17,24 @@
     "axios": "^1.7.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "franc": "^6.2.0",
+    "langdetect": "^0.2.1",
+    "linebyline": "^1.3.0",
     "lucide-react": "^0.394.0",
+    "mic": "^2.1.2",
+    "node-microphone": "^0.1.6",
+    "openai": "^4.26.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.2.1",
+    "react-player": "^2.16.0",
     "react-router-dom": "^6.23.1",
     "react-scroll": "^1.9.0",
+    "react-use": "^17.5.0",
+    "speaker": "^0.5.4",
     "tailwind-merge": "^2.3.0",
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss-animate": "^1.0.7"
@@ -38,6 +50,7 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
-    "vite": "^5.2.0"
+    "vite": "^5.2.0",
+    "vite-plugin-node-polyfills": "^0.22.0"
   }
 }

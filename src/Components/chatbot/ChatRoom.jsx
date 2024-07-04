@@ -1,44 +1,30 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useRef } from 'react';
+// import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
-const ChatRoom = () => {
-  const [messages, setMessages] = useState([]);
-  const { chatRoomId } = useParams();
+const ChatRoom = ({ messages }) => {
+  // const [messages, setMessages] = useState([]);
+  // const { chatRoomId } = useParams();
   const navigate = useNavigate();
 
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `https://elarise-api-mqvmjbdy5a-et.a.run.app/api/chatroom/${chatRoomId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.data.status === "success") {
-          setMessages(response.data.data);
-        } else {
-          console.error("Failed to fetch messages:", response.data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    };
-
-    fetchMessages();
-  }, [chatRoomId]);
+    scrollToBottom();
+  }, [messages]);
 
   const handleLeaveRoom = () => {
-    navigate("/");
+    navigate('/');
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token');
   };
 
   return (
@@ -54,13 +40,13 @@ const ChatRoom = () => {
       </div>
       <div className="flex-1 overflow-y-auto text-sm md:text-lg lg:text-xl flex flex-col gap-2">
         {messages.length > 0 ? (
-          messages.map((msg) => (
+          messages.map((msg, index) => (
             <div
-              key={msg.idMessage}
+              key={index}
               className={`px-4 py-2 my-2 max-w-lg w-auto inline-block ${
                 msg.isUserMessage
-                  ? "self-end bg-[#3FCB80] rounded-l-2xl rounded-tr-2xl"
-                  : "self-start bg-[#FFCF00] rounded-tl-2xl rounded-r-2xl"
+                  ? 'self-end bg-[#3FCB80] rounded-l-2xl rounded-tr-2xl'
+                  : 'self-start bg-[#FFCF00] rounded-tl-2xl rounded-r-2xl'
               }`}
             >
               <p className="text-black break-words">{msg.message}</p>
