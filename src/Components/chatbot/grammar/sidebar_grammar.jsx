@@ -1,14 +1,27 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaBars, FaPlus } from 'react-icons/fa';
+import { FaBars, FaPlus, FaEllipsisV } from 'react-icons/fa';
 import { CiChat1 } from 'react-icons/ci';
 import { useNavigate } from 'react-router-dom';
 import { IoMdExit } from 'react-icons/io';
 import DeleteButton from '../../DeleteButton';
+import { Trash2, FolderPen } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@radix-ui/react-dropdown-menu';
+import RenameModal from '../../RenameModal';
 
 const SidebarGrammar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [chats, setChats] = useState([]);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState(null);
+  const [chatToRename, setChatToRename] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,7 +29,7 @@ const SidebarGrammar = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          'https://elarise-api-mqvmjbdy5a-et.a.run.app/api/get-all-chatroom-grammar',
+          'https://backend-hq3lexjwcq-et.a.run.app/api/get-all-chatroom-grammar',
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -41,11 +54,21 @@ const SidebarGrammar = () => {
     setIsOpen(!isOpen);
   };
 
+  const truncateText = (text, maxLength) => {
+    if (!text) {
+      return '';
+    }
+    if (text.length <= maxLength) {
+      return text;
+    }
+    return text.slice(0, maxLength) + '...';
+  };
+
   const addChat = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'https://elarise-api-mqvmjbdy5a-et.a.run.app/api/chatroom-grammar',
+        'https://backend-hq3lexjwcq-et.a.run.app/api/chatroom-grammar',
         {},
         {
           headers: {
@@ -71,6 +94,29 @@ const SidebarGrammar = () => {
 
   const handleChatClick = (chatId) => {
     navigate(`/grammar/${chatId}`);
+  };
+  const handleRenameChat = async (chatRoomId, newName) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put(
+        `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}`,
+        { chatRoomName: newName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.data.status === 'success') {
+        setChats(
+          chats.map((chat) =>
+            chat.id === chatRoomId ? { ...chat, chatRoomName: newName } : chat
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error renaming chat:', error);
+    }
   };
   const logout = () => {
     localStorage.removeItem('token');
@@ -124,17 +170,67 @@ const SidebarGrammar = () => {
                 }
                 style={{ borderColor: index % 2 === 0 ? '#EFB4D4' : '#F8C807' }}
               >
-                <span className="mr-5 drop-shadow">
-                  <CiChat1 className="text-3xl" />
-                </span>
-                {isOpen && chat.chatRoomName}
+                <div className="flex  items-center">
+                  <span className="mr-5 drop-shadow">
+                    <CiChat1 className="text-3xl" />
+                  </span>
+                  {isOpen && chat.chatRoomName}
+                </div>
+
+                {isOpen && (
+                  <div className="  text-xs mt-2 text-gray-700">
+                    {truncateText(chat.lastAIMessageText, 50)}
+                  </div>
+                )}
               </div>
               {isOpen && (
-                <DeleteButton
-                  chatRoomId={chat.id}
-                  setChats={setChats}
-                  chats={chats}
-                />
+                // <button onClick={() => toggleMenu(chat.id)} className="ml-2 relative">
+                // {activeMenu === chat.id && isOpen && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button>
+                      <FaEllipsisV />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 flex relative flex-col  z-50 items-start bg-white border-[2px] border-black text-black rounded-2xl">
+                    <DropdownMenuItem
+                      className="flex h-8 items-center w-full rounded-t-xl hover:bg-slate-300"
+                      onSelect={() => {
+                        setChatToRename(chat.id);
+                        setIsRenameModalOpen(true);
+                      }}
+                    >
+                      {' '}
+                      <FolderPen className="mx-2" />
+                      <span>Rename Chatroom</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className=" border-black border-[1px] w-full" />
+                    <DropdownMenuItem
+                      className="flex h-8 items-center w-full rounded-b-xl cursor-pointer hover:bg-red-300"
+                      onSelect={() => {
+                        setChatToDelete(chat.id);
+                        setIsDeleteModalOpen(true);
+                        {
+                          chatToDelete && (
+                            <DeleteButton
+                              chatRoomId={chatToDelete}
+                              setChats={setChats}
+                              chats={chats}
+                              isOpen={isDeleteModalOpen}
+                              onClose={() => {
+                                setIsDeleteModalOpen(false);
+                                setChatToDelete(null);
+                              }}
+                            />
+                          );
+                        }
+                      }}
+                    >
+                      <Trash2 className="mx-2" />
+                      <span>Delete Chatroom</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           ))
@@ -159,6 +255,26 @@ const SidebarGrammar = () => {
         </button>
       </div>
       {/* button untuk logut end */}
+      {chatToRename && (
+        <RenameModal
+          isOpen={isRenameModalOpen}
+          onClose={() => setIsRenameModalOpen(false)}
+          chatRoomId={chatToRename}
+          onRename={handleRenameChat}
+        />
+      )}
+      {chatToDelete && (
+        <DeleteButton
+          chatRoomId={chatToDelete}
+          setChats={setChats}
+          chats={chats}
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setChatToDelete(null);
+          }}
+        />
+      )}
     </div>
   );
 };

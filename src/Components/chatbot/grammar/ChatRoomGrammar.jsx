@@ -1,37 +1,38 @@
-import { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
-import EditMessageModal from "./EditMessageGrammar";
-import { FolderPen, Trash2 } from "lucide-react";
-import Popup from "reactjs-popup";
-import "reactjs-popup/dist/index.css";
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import EditMessageModal from './EditMessageGrammar';
+import { FolderPen, Trash2 } from 'lucide-react';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 
 const ChatRoomGrammar = ({ messages, setMessages }) => {
   const { chatRoomId } = useParams();
   const messagesEndRef = useRef(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [messageToEdit, setMessageToEdit] = useState({ id: null, text: "" });
+  const [messageToEdit, setMessageToEdit] = useState({ id: null, text: '' });
 
   const navigate = useNavigate();
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
   const handleLeaveRoom = () => {
-    navigate("/");
+    navigate('/');
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const handleEditMessage = async (messageId, newText) => {
+   const handleEditMessage = async (idMessage, newText) => {
     try {
-      const token = localStorage.getItem("token");
+      console.log('Editing message:', idMessage, newText);
+      const token = localStorage.getItem('token');
       const response = await axios.put(
-        `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}/edit-text/${messageId}`,
+        `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}/edit-text/${idMessage}`,
         { messageText: newText },
         {
           headers: {
@@ -39,41 +40,52 @@ const ChatRoomGrammar = ({ messages, setMessages }) => {
           },
         }
       );
-      if (response.data.status === "success") {
-        setMessages((prevMessages) =>
-          prevMessages.map((msg) =>
-            msg.idMessage === messageId && !msg.idAIMessage
-              ? { ...msg, message: newText }
-              : msg
-          )
-        );
+
+      if (response.data.status === 'success') {
+        const { userMessage, idMessage, message } = response.data;
+
+        setMessages((prevMessages) => {
+          const newMessages = [...prevMessages];
+          const indexToEdit = newMessages.findIndex((msg) => msg.idMessage === idMessage && !msg.isUserMessage);
+
+          if (indexToEdit !== -1) {
+            newMessages[indexToEdit] = { ...newMessages[indexToEdit], message: message };
+
+            if (indexToEdit > 0 && newMessages[indexToEdit - 1].isUserMessage) {
+              newMessages[indexToEdit - 1] = { ...newMessages[indexToEdit - 1], message: userMessage };
+            }
+
+            return newMessages;
+          } else {
+            console.error('Message not found');
+            return prevMessages;
+          }
+        });
       }
     } catch (error) {
-      console.error("Error editing message:", error);
+      console.error('Error editing message:', error);
     }
   };
 
-  const handleDeleteMessage = async (messageId) => {
+
+  const handleDeleteMessage = async (idMessage) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.delete(
-        `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}/chat/${messageId}`,
+      console.log('Deleting message:', idMessage);
+      const token = localStorage.getItem('token');
+      await axios.delete(
+        `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}/chat/${idMessage}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      if (response.data.status === "success") {
-        setMessages((prevMessages) =>
-          prevMessages.filter(
-            (msg) =>
-              msg.idMessage !== messageId && msg.idAIMessage !== messageId // Remove user message and related AI response
-          )
-        );
-      }
+      // Remove message from state
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg.idMessage !== idMessage)
+      );
     } catch (error) {
-      console.error("Error deleting message:", error);
+      console.error('Error deleting message:', error);
     }
   };
 
@@ -97,14 +109,14 @@ const ChatRoomGrammar = ({ messages, setMessages }) => {
               <div
                 key={`${msg.idMessage}-${index}`}
                 className={`max-w-lg w-auto my-2 ${
-                  msg.isUserMessage ? "self-end" : "self-start"
+                  msg.isUserMessage ? 'self-end' : 'self-start'
                 }`}
               >
                 <div
                   className={`px-4 py-1 ${
                     msg.isUserMessage
-                      ? "bg-[#3FCB80] rounded-l-2xl rounded-tr-2xl"
-                      : "bg-[#FFCF00] rounded-tl-2xl rounded-r-2xl"
+                      ? 'bg-[#3FCB80] rounded-l-2xl rounded-tr-2xl'
+                      : 'bg-[#FFCF00] rounded-tl-2xl rounded-r-2xl'
                   }`}
                 >
                   <p className="text-black break-words">{msg.message}</p>
@@ -132,23 +144,23 @@ const ChatRoomGrammar = ({ messages, setMessages }) => {
                       modal
                       nested
                       contentStyle={{
-                        width: "300px",
-                        padding: "20px",
-                        borderRadius: "25px",
-                        backgroundColor: "#f8f8f8",
+                        width: '300px',
+                        padding: '20px',
+                        borderRadius: '25px',
+                        backgroundColor: '#f8f8f8',
                       }}
                       overlayStyle={{
-                        backgroundColor: "rgba(0,0,0,0.5)",
+                        backgroundColor: 'rgba(0,0,0,0.5)',
                       }}
                     >
                       {(close) => (
                         <div className="modal  flex flex-col ">
                           <div className="header font-bold ">
-                            {" "}
-                            Delete Confirmation{" "}
+                            {' '}
+                            Delete Confirmation{' '}
                           </div>
                           <div className="content ">
-                            {" "}
+                            {' '}
                             Are you sure you want to delete this message?
                           </div>
                           <div className="actions font-bold flex justify-end mt-10 ">

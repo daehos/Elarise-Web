@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = 'https://elarise-api-mqvmjbdy5a-et.a.run.app/api';
+const API_URL = 'https://backend-hq3lexjwcq-et.a.run.app/api';
 
 
 // Initialize OpenAI API client with the provided API key

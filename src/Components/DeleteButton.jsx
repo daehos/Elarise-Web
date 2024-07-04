@@ -1,4 +1,3 @@
-import React, { useState,useEffect } from "react";
 import axios from "axios";
 import {
   AlertDialog,
@@ -8,9 +7,7 @@ import {
   AlertDialogDescription,
 
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@radix-ui/react-alert-dialog"
-import { useNavigate } from "react-router-dom";
 
 const DeleteButton = ({ chatRoomId, setChats, chats, isOpen, onClose }) => {
 

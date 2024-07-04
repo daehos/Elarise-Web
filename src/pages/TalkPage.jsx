@@ -85,7 +85,7 @@ const TalkPage = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          `https://elarise-api-mqvmjbdy5a-et.a.run.app/api/chatroom/${chatRoomId}`,
+          `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -122,7 +122,7 @@ const TalkPage = () => {
 
     if (transcript !== '') {
       clearTimeout(speechTimeoutRef.current);
-      speechTimeoutRef.current = setTimeout(handleSpeechTimeout, 5000);
+      speechTimeoutRef.current = setTimeout(handleSpeechTimeout, 3000);
     }
 
     return () => clearTimeout(speechTimeoutRef.current);
@@ -134,7 +134,7 @@ const TalkPage = () => {
         console.log('User has been silent for 5 seconds.');
         stopListening();
       }
-    }, 5000); // 5 seconds
+    }, 3000); // 5 seconds
 
     return () => clearTimeout(silenceTimeout);
   }, [transcript, stopListening]);
@@ -204,6 +204,7 @@ const TalkPage = () => {
             <img src="/R_1.png" alt="" className="scale-50 w-full h-full" />
           </button>
         </div>
+        
         {audioUrl && (
           <ReactPlayer
             url={audioUrl}

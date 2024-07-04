@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import BaseVoiceScreen from '../Components/chatbot/BaseVoiceScreen';
 import ChatRoomGrammar from '../Components/chatbot/grammar/ChatRoomGrammar';
 import SidebarGrammar from '../Components/chatbot/grammar/sidebar_grammar';
@@ -6,6 +6,8 @@ import { Textarea } from '../Components/textarea';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import postGrammarChatroom from '../Service/chatService';
+import { IoMdMic, IoMdMicOff } from 'react-icons/io';
+import useSpeechToText from '../hooks/useSpeechToText';
 
 const ChatPage = () => {
   const [messages, setMessages] = useState([]);
@@ -14,22 +16,26 @@ const ChatPage = () => {
   const [state] = useState(true);
   const [message, setMessage] = useState('');
 
-  // console.log(messages);
+  const { isListening, transcript, startListening, stopListening } =
+    useSpeechToText();
 
-  function makeid(length) {
-    let result = '';
-    const characters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return result;
-  }
+  const transcriptRef = useRef(transcript);
+  const speechTimeoutRef = useRef(null);
 
-  const handleMessage = async () => {
+  // function makeid(length) {
+  //   let result = '';
+  //   const characters =
+  //     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  //   const charactersLength = characters.length;
+  //   let counter = 0;
+  //   while (counter < length) {
+  //     result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  //     counter += 1;
+  //   }
+  //   return result;
+  // }
+
+  const handleMessage = useCallback(async () => {
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -37,37 +43,61 @@ const ChatPage = () => {
       return;
     }
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        ...messages,
-        message,
-        isUserMessage: true,
-        isAIMessage: false,
-        isPlaceholder: false,
-        idMessage: makeid(5),
-      },
-    ]);
+    // Add user message to the state
+    const userMessage = {
+      message,
+      isUserMessage: true,
+      isAIMessage: false,
+      isPlaceholder: false,
+      idMessage: null, // Placeholder for now, will be updated with response ID
+    };
 
+    setMessages((prev) => [...prev, userMessage]);
     setMessage(''); // Clear the message input
 
+    try {
+      const response = await postGrammarChatroom(token, chatRoomId, message);
+      console.log('Message sent:', response);
 
-    postGrammarChatroom(token, chatRoomId, message)
-      .then((response) => {
-        console.log('Message sent:', response);
-        setMessages((prev) => [...prev, response]);
-      })
-      .catch((error) => {
-        console.error('There was an error sending the message!', error);
-      });
-  };
+      // Update user message with idMessage from response
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg === userMessage ? { ...msg, idMessage: response.idMessage } : msg
+        )
+      );
+
+      // Add placeholder for AI response
+      const placeholderResponse = {
+        message: '',
+        isUserMessage: false,
+        isAIMessage: true,
+        isPlaceholder: true,
+      };
+
+      setMessages((prev) => [...prev, placeholderResponse]);
+
+      // Update the state with the actual AI response
+      setMessages((prev) =>
+        prev.map((msg, index) =>
+          msg.isPlaceholder && index === prev.length - 1
+            ? { ...response, isPlaceholder: false }
+            : msg
+        )
+      );
+    } catch (error) {
+      console.error('There was an error sending the message!', error);
+      // Remove user message on error
+      setMessages((prev) => prev.filter((msg) => msg !== userMessage));
+    }
+
+  }, [chatRoomId, message]);
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          `https://elarise-api-mqvmjbdy5a-et.a.run.app/api/chatroom/${chatRoomId}`,
+          `https://backend-hq3lexjwcq-et.a.run.app/api/chatroom/${chatRoomId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -88,6 +118,47 @@ const ChatPage = () => {
     fetchMessages();
   }, [chatRoomId]);
 
+  useEffect(() => {
+    if (transcript !== '') {
+      setMessage(transcript);
+    }
+    transcriptRef.current = transcript; // Update the ref with the current transcript
+  }, [transcript]);
+
+  useEffect(() => {
+    const handleSpeechTimeout = () => {
+      console.log('User stopped speaking.');
+      stopListening();
+      handleMessage();
+    };
+
+    if (transcript !== '') {
+      clearTimeout(speechTimeoutRef.current);
+      speechTimeoutRef.current = setTimeout(handleSpeechTimeout, 3000);
+    }
+
+    return () => clearTimeout(speechTimeoutRef.current);
+  }, [transcript, stopListening, handleMessage]);
+
+  useEffect(() => {
+    const silenceTimeout = setTimeout(() => {
+      if (transcriptRef.current === '') {
+        console.log('User has been silent for 5 seconds.');
+        stopListening();
+      }
+    }, 3000); // 5 seconds
+
+    return () => clearTimeout(silenceTimeout);
+  }, [transcript, stopListening]);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(speechTimeoutRef.current);
+    };
+  }, []);
+
+  console.log('Current transcript:', transcript);
+
   return (
     <>
       <div className="flex h-screen overflow-hidden ">
@@ -96,7 +167,7 @@ const ChatPage = () => {
           {state === true ? <BaseVoiceScreen /> : <></>}
           {/* Room Chat */}
           {/* <ChatRoomGrammar key={refreshKey} /> */}
-          <ChatRoomGrammar messages={messages} />
+          <ChatRoomGrammar messages={messages} setMessages={setMessages} />
           {/* Room Chat End */}
           {/* greeting text */}
           {/* <div className="flex flex-col h-full text-4xl md:text-6xl lg:text-8xl  items-center font-nunito ">
@@ -107,6 +178,25 @@ const ChatPage = () => {
             </div> */}
           {/* greeting text  end*/}
           {/* area input chat */}
+
+          <div className=" absolute bottom-4 mb-32 flex flex-col w-full items-center justify-center">
+            {/* <h1 className="ml-5 font-nunito text-4xl mb-3 font-semibold">
+            Tell Elara
+          </h1> */}
+
+            <button
+              className="bg-[#EFB4D4] flex justify-center items-center rounded-full w-20 h-20 z-10 active:ring-4 active:ring-[#3FCB80] focus-visible:ring-offset-2 "
+              onClick={isListening ? stopListening : startListening}
+            >
+              {' '}
+              {isListening ? (
+                <IoMdMic className="h-3/4 w-1/2" />
+              ) : (
+                <IoMdMicOff className="h-3/4 w-1/2" />
+              )}
+            </button>
+          </div>
+
           <div className=" relative bottom-28 flex flex-row w-full items-center justify-center z-10">
             <Textarea
               className=" w-[60%] text-lg ml-7 mb-4 h-14"

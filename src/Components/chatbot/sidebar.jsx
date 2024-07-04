@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { FaBars, FaPlus } from "react-icons/fa";
-import { CiChat1 } from "react-icons/ci";
-import { useNavigate } from "react-router-dom";
-import DeleteButton from "../DeleteButton";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FaBars, FaPlus } from 'react-icons/fa';
+import { CiChat1 } from 'react-icons/ci';
+import { useNavigate } from 'react-router-dom';
+import DeleteButton from '../DeleteButton';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -13,9 +13,9 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         const response = await axios.get(
-          "https://elarise-api-mqvmjbdy5a-et.a.run.app/api/get-all-chatroom-voice",
+          'https://backend-hq3lexjwcq-et.a.run.app/api/get-all-chatroom-voice',
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -26,10 +26,10 @@ const Sidebar = () => {
         if (Array.isArray(response.data.data)) {
           setChats(response.data.data);
         } else {
-          console.error("Unexpected response format:", response.data.data);
+          console.error('Unexpected response format:', response.data.data);
         }
       } catch (error) {
-        console.error("Error fetching chats:", error);
+        console.error('Error fetching chats:', error);
       }
     };
 
@@ -42,9 +42,9 @@ const Sidebar = () => {
 
   const addChat = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await axios.post(
-        "https://elarise-api-mqvmjbdy5a-et.a.run.app/api/chatroom-voice",
+        'https://backend-hq3lexjwcq-et.a.run.app/api/chatroom-voice',
         {},
         {
           headers: {
@@ -53,18 +53,18 @@ const Sidebar = () => {
         }
       );
 
-      if (response.data.status === "success") {
+      if (response.data.status === 'success') {
         const newChat = {
           id: response.data.data.chatRoomId,
           name: response.data.data.chatRoomName,
-          color: "#3FCB80",
+          color: '#3FCB80',
         };
         setChats([newChat, ...chats]);
       } else {
-        console.error("Failed to create new chat room:", response.data.message);
+        console.error('Failed to create new chat room:', response.data.message);
       }
     } catch (error) {
-      console.error("Error creating new chat room:", error);
+      console.error('Error creating new chat room:', error);
     }
   };
 
@@ -75,7 +75,7 @@ const Sidebar = () => {
   return (
     <div
       className={`h-screen rounded-r-3xl ${
-        isOpen ? "w-80" : "w-20"
+        isOpen ? 'w-80' : 'w-20'
       } bg-black text-white font-nunito flex flex-col transition-width duration-300`}
     >
       <div className="flex flex-col items-center p-4 mt-5">
@@ -87,10 +87,10 @@ const Sidebar = () => {
         <button
           onClick={addChat}
           className={`${
-            isOpen ? "w-60" : "w-14"
+            isOpen ? 'w-60' : 'w-14'
           } mt-4 flex text-lg items-center justify-center border-[3px] border-white h-15 bg-[#3FCB80] text-black px-3 py-1 rounded-xl`}
         >
-          <FaPlus className={`${isOpen ? "mr-2" : "mr-0"}`} />
+          <FaPlus className={`${isOpen ? 'mr-2' : 'mr-0'}`} />
           {isOpen && (
             <span className="font-nunito font-bold drop-shadow">New Chat</span>
           )}
@@ -133,8 +133,7 @@ const Sidebar = () => {
                 />
               )}
             </div>
-          )
-        )
+          ))
         ) : (
           <div className="text-center text-gray-500">No chats available</div>
         )}
