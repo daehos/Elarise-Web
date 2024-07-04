@@ -6,6 +6,7 @@ import TalkPage from "./pages/TalkPage";
 import BaseChatScreen from "./Components/chatbot/BaseChatScreen";
 import authService from "./Service/authService";
 import ChatPage from "./pages/ChatPage";
+import PasswordPage from "./pages/Password";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/talk" element={<TalkPage />} />
+          <Route path="/password" element={<PasswordPage/>}/>
           {/* <Route path="/grammar" element={<ChatPage />} /> */}
           {/* <Route path="/grammar/:chatRoomId" element={<ChatPage />} /> */}
           {["/grammar", "/grammar/:chatRoomId"].map((path, index) => (
